@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Debasmita's Cyber Lair</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* ====== RESET ====== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #121212 0, #020202 55%);
+      color: #e5fff6;
+      overflow-x: hidden;
+      perspective: 1000px;
+    }
+
+    a {
+      color: #7bfff1;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ====== MATRIX BACKGROUND LAYER ====== */
+    .matrix-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      opacity: 0.25;
+      font-family: "Consolas", monospace;
+      color: #00ff88;
+      overflow: hidden;
+    }
+
+    .matrix-column {
+      position: absolute;
+      top: -100%;
+      white-space: pre;
+      animation: fall linear infinite;
+      font-size: 14px;
+      text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-100%);
+      }
+      100% {
+        transform: translateY(200%);
+      }
+    }
+
+    /* ====== PARALLAX GLOW LAYER ====== */
+    .glow-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(45px);
+      opacity: 0.6;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .glow-orb.orb-1 {
+      width: 260px;
+      height: 260px;
+      background: #00ff88;
+      left: 5%;
+      top: 10%;
+    }
+
+    .glow-orb.orb-2 {
+      width: 280px;
+      height: 280px;
+      background: #00bfff;
+      right: 5%;
+      top: 30%;
+    }
+
+    .glow-orb.orb-3 {
+      width: 320px;
+      height: 320px;
+      background: #ff00b3;
+      left: 30%;
+      bottom: -5%;
+    }
+
+    /* ====== MAIN LAYOUT ====== */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 16px 80px;
+    }
+
+    header {
+      margin-bottom: 32px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 255, 136, 0.6);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #7bfff1;
+      margin-bottom: 14px;
+    }
+
+    .title-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .title-row h1 {
+      font-size: clamp(28px, 4vw, 40px);
+      text-shadow: 0 0 12px #00ff88;
+    }
+
+    .title-row p {
+      max-width: 420px;
+      font-size: 14px;
+      color: #bdeee1;
+    }
+
+    /* ====== 3D TILT CARD ====== */
+    .tilt-wrapper {
+      margin-top: 24px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .tilt-card {
+      width: 380px;
+      padding: 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(0, 255, 136, 0.6);
+      background: radial-gradient(circle at top left, #072920 0, #050505 55%);
+      box-shadow: 0 0 25px rgba(0, 255, 136, 0.35);
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease-out, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tilt-card h2 {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .tilt-card p {
+      font-size: 13px;
+      color: #a9e5d5;
+      margin-bottom: 10px;
+    }
+
+    .tilt-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 255, 136, 0.5);
+      background: rgba(0, 0, 0, 0.5);
+      font-size: 11px;
+      color: #afffe4;
+    }
+
+    .star-spark {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 22px;
+      filter: drop-shadow(0 0 10px #ffd700);
+      transition: transform 0.2s, filter 0.2s;
+      transform-origin: center;
+    }
+
+    .tilt-card:hover .star-spark {
+      transform: scale(1.3) rotate(-15deg);
+      filter: drop-shadow(0 0 20px #fff);
+    }
+
+    /* ====== SECTIONS ====== */
+    section {
+      margin-top: 70px;
+      opacity: 0;
+      transform: translateY(60px);
+      transition: all 0.8s ease-out;
+    }
+
+    section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section-box {
+      border-radius: 18px;
+      border: 1px solid rgba(123, 255, 241, 0.5);
+      padding: 20px 18px;
+      background: rgba(2, 2, 2, 0.9);
+      box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
+    }
+
+    .section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.8px;
+      color: #7bfff1;
+      margin-bottom: 6px;
+    }
+
+    .section-box h2 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .section-box p {
+      font-size: 13px;
+      color: #c2f5eb;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(123, 255, 241, 0.7);
+    }
+
+    /* ====== TERMINAL PANEL ====== */
+    .terminal {
+      margin-top: 18px;
+      background: #050505;
+      border-radius: 12px;
+      border: 1px solid #1f1f1f;
+      padding: 10px 12px;
+      font-family: "Consolas", monospace;
+      font-size: 12px;
+      color: #9df8d0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      color: #5e5e5e;
+      font-size: 11px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff5f57;
+    }
+
+    .dot.yellow {
+      background: #febc2e;
+    }
+    .dot.green {
+      background: #28c840;
+    }
+
+    .terminal-body {
+      white-space: pre-wrap;
+      min-height: 60px;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 7px;
+      background: #9df8d0;
+      margin-left: 2px;
+      animation: blink 0.8s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% {
+        opacity: 1;
+      }
+      51%, 100% {
+        opacity: 0;
+      }
+    }
+
+    /* ====== FOOTER ====== */
+    footer {
+      margin-top: 70px;
+      text-align: center;
+      font-size: 12px;
+      color: #7f8c8d;
+    }
+
+    .spark-text {
+      position: relative;
+      display: inline-block;
+    }
+
+    .spark-text::after {
+      content: "⚡";
+      position: absolute;
+      right: -16px;
+      top: -8px;
+      filter: drop-shadow(0 0 10px #ffffff);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: all 0.25s ease-out;
+    }
+
+    .spark-text:hover::after {
+      opacity: 1;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 700px) {
+      .tilt-card {
+        width: 100%;
+      }
+      .title-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background FX -->
+  <div class="matrix-layer" id="matrix-layer"></div>
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+  <div class="glow-orb orb-3"></div>
+
+  <div class="container">
+    <header>
+      <div class="badge">
+        <span>DebAI Systems Online</span>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1>> Welcome to Debasmita's Cyber Lair_</h1>
+          <p>
+            A side-channel to my GitHub profile where UI, code, and chaos collide.
+            Move your mouse, scroll a bit, and let the interface misbehave
+            politely.
+          </p>
+        </div>
+        <p>
+          Main profile:
+          <a href="https://github.com/DebasmitaBose0" target="_blank"
+            >github.com/DebasmitaBose0</a
+          >
+        </p>
+      </div>
+
+      <div class="tilt-wrapper">
+        <div class="tilt-card" id="tilt-card">
+          <div class="star-spark">⭐</div>
+          <h2>Featured Identity: <span class="spark-text">Full-Stack Learner</span></h2>
+          <p>
+            Currently grinding XP in web dev, Java, Python, and building
+            recommenders and chatbots like it's a side quest.
+          </p>
+          <div class="tilt-chip-row">
+            <div class="chip">⚙ Java • Python • JS</div>
+            <div class="chip">🎭 GitHub README chaos</div>
+            <div class="chip">🧠 Algorithms & DSA</div>
+            <div class="chip">💬 Chatbots & AI APIs</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECTION 1: SCROLL TRIGGER -->
+    <section id="section-1">
+      <div class="section-box">
+        <div class="section-label">Scroll Trigger #1</div>
+        <h2>🚗 Cinematic Scroll Entrance</h2>
+        <p>
+          As you scroll down, sections fade in like scenes from a trailer.
+          This isn't just a portfolio, it's a low-key operating system for my
+          projects and experiments.
+        </p>
+        <div class="pill-row">
+          <div class="pill">Smooth reveal</div>
+          <div class="pill">Focus on readability</div>
+          <div class="pill">Subtle motion</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: TERMINAL + STATUS -->
+    <section id="section-2">
+      <div class="section-box">
+        <div class="section-label">System Monitor</div>
+        <h2>🧠 Live Tech Mood Widget</h2>
+        <p>
+          Fake but extremely honest "system status" that describes my current
+          dev vibe better than any timeline.
+        </p>
+
+        <div class="terminal">
+          <div class="terminal-header">
+            <span class="dot"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span>deb@system: ~/status</span>
+          </div>
+          <div class="terminal-body" id="terminal-body">
+            <!-- Filled by JS typing effect -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: MINI "GAME" PANEL -->
+    <section id="section-3">
+      <div class="section-box">
+        <div class="section-label">Mini Game</div>
+        <h2>🕹️ Tap-the-Bug (Imagination Edition)</h2>
+        <p>
+          A small tribute to all the bugs we've fixed at 3 AM. Your score only
+          exists in your head, just like that one "simple" feature request.
+        </p>
+
+        <div class="terminal" style="margin-top: 14px;">
+          <div class="terminal-header">
+            <span class="dot"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span>game@console: ~/tap-the-bug</span>
+          </div>
+          <div class="terminal-body">
+            🐞  Bug appears on screen...<br />
+            ⚡  You: Alt+Tab, StackOverflow, caffeine<br />
+            ✅  Bug fixed. Another one spawned.<br /><br />
+            Score: <span class="spark-text">999</span><br />
+            High Score: You, obviously.<br /><br />
+            Controls: Imagine clicking. If nothing happens, congrats —<br />
+            you have unlocked Real Life™.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Built by <strong>Debasmita</strong>. If your eyes survived this lair,
+      you may now safely return to
+      <a href="https://github.com/DebasmitaBose0" target="_blank"
+        >my GitHub profile</a
+      >.
+    </footer>
+  </div>
+
+  <script>
+    // ====== MATRIX BACKGROUND GENERATION ======
+    const matrixLayer = document.getElementById("matrix-layer");
+    const columns = 18;
+    const chars = "01デバスマタAIチャットボット";
+
+    for (let i = 0; i < columns; i++) {
+      const col = document.createElement("div");
+      col.className = "matrix-column";
+
+      // random delay & duration
+      const duration = 8 + Math.random() * 8;
+      const delay = Math.random() * -duration;
+      const left = (i / columns) * 100;
+
+      col.style.left = `${left}%`;
+      col.style.animationDuration = `${duration}s`;
+      col.style.animationDelay = `${delay}s`;
+
+      // random column text
+      let text = "";
+      const length = 20 + Math.floor(Math.random() * 25);
+      for (let j = 0; j < length; j++) {
+        text += chars[Math.floor(Math.random() * chars.length)] + "\n";
+      }
+      col.textContent = text;
+      matrixLayer.appendChild(col);
+    }
+
+    // ====== 3D TILT CARD ======
+    const card = document.getElementById("tilt-card");
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const rotateY = ((x - rect.width / 2) / rect.width) * 18;
+      const rotateX = -((y - rect.height / 2) / rect.height) * 14;
+      card.style.transform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+    });
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "rotateY(0deg) rotateX(0deg)";
+    });
+
+    // ====== PARALLAX GLOW ORBS ======
+    const orbs = document.querySelectorAll(".glow-orb");
+    document.addEventListener("mousemove", (e) => {
+      const xPercent = e.clientX / window.innerWidth - 0.5;
+      const yPercent = e.clientY / window.innerHeight - 0.5;
+      orbs.forEach((orb, index) => {
+        const depth = (index + 1) * 12;
+        const xMove = -xPercent * depth;
+        const yMove = -yPercent * depth;
+        orb.style.transform = `translate(${xMove}px, ${yMove}px)`;
+      });
+    });
+
+    // ====== SCROLL REVEAL ======
+    const sections = document.querySelectorAll("section");
+    const reveal = () => {
+      sections.forEach((sec) => {
+        const top = sec.getBoundingClientRect().top;
+        if (top < window.innerHeight - 100) {
+          sec.classList.add("visible");
+        }
+      });
+    };
+    window.addEventListener("scroll", reveal);
+    reveal();
+
+    // ====== TERMINAL TYPING EFFECT ======
+    const terminalBody = document.getElementById("terminal-body");
+    const lines = [
+      "+ STATUS: Running at peak efficiency ⚡",
+      "+ SERVER UPTIME: 99.98%",
+      "! CURRENT MODE: CODE & CHAOS",
+      "# CPU TEMP: 56°C — Overthinking Java",
+      "- BUG DETECTED: Expected ';' found 'panic'",
+    ];
+    const fullText = lines.join("\n");
+    let idx = 0;
+
+    const span = document.createElement("span");
+    const cursor = document.createElement("span");
+    cursor.className = "cursor";
+    terminalBody.appendChild(span);
+    terminalBody.appendChild(cursor);
+
+    function type() {
+      if (idx <= fullText.length) {
+        span.textContent = fullText.slice(0, idx);
+        idx++;
+        setTimeout(type, 22);
+      }
+    }
+    type();
+  </script>
+</body>
+</html>
